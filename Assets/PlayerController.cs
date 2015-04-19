@@ -9,23 +9,24 @@ public class PlayerController : MonoBehaviour {
     public float immuneTimeAfterHit = 1.0f;
     float immuneTimeCounter = 0;
     bool immune = false;
-
-
+    Vector3 initPos = new Vector3(0,0,0);
 
 	// List of all turrets/visible turrets
-	GameObject[] AllTurrets = new GameObject[99]; //GameObject.FindGameObjectsWithTag("turret");
+	GameObject[] AllTurrets; 
 	GameObject CurrentTurret;
-	int TurPos; // I'm so sorry Marky Mark
-	int MaxTurrets;
+	int TurPos = 0; // I'm so sorry Marky Mark
 
-	// Too lazy to find a real fix now
-	bool hasntDetectedTurrets = true;
-
+    // List of all CannonBalls;
+    GameObject[] AllCannons;
 
 	// Use this for initialization
 	void Start () {
-	
-	}
+        AllTurrets = GameObject.FindGameObjectsWithTag("Turret");
+        CurrentTurret = AllTurrets[0];
+        CurrentTurret.GetComponent<TurretScript>().isTargeted = true;
+        CurrentTurret.renderer.material.color = new Color(.2f, .3f, 1f);
+        initPos = transform.position;
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -49,29 +50,47 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-		// Hacked so hard, will fix later
-		if (hasntDetectedTurrets) 
-		{
-			AllTurrets = GameObject.FindGameObjectsWithTag ("Turret");
-			CurrentTurret = AllTurrets[0];
-			MaxTurrets = AllTurrets.Length;
-		}
+        // I'm faaaaaaaaaaaaaaaaaaaaaaaaaaaallllllllllllllliiiiiinnnnnnnnggggg
+        if (transform.position.y < -5)
+        {
+            transform.rigidbody.velocity = new Vector3(0, 0, 0);
+            transform.position = initPos;
+            // haha, like it matters
+            lives--;
+        }
 
 		// Change Firing turret
 		if (Input.GetKeyDown ("tab"))
 			ChangeTurret();
 
-		hasntDetectedTurrets = false;
+        if (Input.GetKeyDown("r"))
+        {
+            AllCannons = GameObject.FindGameObjectsWithTag("CannonBall");
+            DeleteCannons();
+        }
 	}
 
 	void ChangeTurret()
 	{
-		if (TurPos < MaxTurrets) {
-			CurrentTurret = AllTurrets [TurPos];
-			TurPos ++;
-		} else
-			TurPos = 0;
+        // Previous turret detargeted
+        AllTurrets[TurPos].GetComponent<TurretScript>().isTargeted = false;
+        AllTurrets[TurPos].renderer.material.color = new Color(1.0f, 1.0f, 1.0f);
+		if (TurPos + 1 < AllTurrets.Length)     
+			CurrentTurret = AllTurrets [++TurPos];
+        else
+            CurrentTurret = AllTurrets[TurPos = 0];
+        // Current turret targeted
+        CurrentTurret.GetComponent<TurretScript>().isTargeted = true;
+        CurrentTurret.renderer.material.color = new Color(1f, .1f, .15f);
 	}
+
+    void DeleteCannons()
+    {
+        for (int i = 0; i < AllCannons.Length; i++)
+        {
+            AllCannons[i].GetComponent<BulletMovement>().ClearBullet();
+        }
+    }
 
     void OnTriggerStay(Collider other){
         if(other.gameObject.tag == "DamageZone" && !immune){

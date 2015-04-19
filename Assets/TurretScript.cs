@@ -6,6 +6,7 @@ public class TurretScript : MonoBehaviour {
     public float cannonballSpeed = 30;
     public float accuracyRadius = 10;
     public bool HighArcTrajectory = false;
+    public bool isTargeted = false;
     float reloadCounter = 0;
 
     public GameObject cannonBall;
@@ -18,21 +19,18 @@ public class TurretScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
-		/////
-		/// both turrets have this...need to throw in another script qqqqqqqqq
-		/// 
-		/// 
-		/// 
-		/// 
-		/// 
+
 		// Turn cannon on or off
-		if (Input.GetKeyDown("o"))
+		if (Input.GetKeyDown("o") && isTargeted )
 			isOn = !isOn;
+        // For case where not targeted anymore, but was left on
+        if (!isTargeted)
+            isOn = false;
 
         reloadCounter += Time.deltaTime;
-		if (reloadCounter >= reloadSpeed && (isOn) && isOn){
+		if (reloadCounter >= reloadSpeed && isOn ){
             GameObject ball = (GameObject)GameObject.Instantiate(cannonBall, transform.position, Quaternion.LookRotation(Vector3.up));
+            ball.tag = "CannonBall";
             ball.GetComponent<BulletMovement>().speed = cannonballSpeed;
             ball.GetComponent<BulletMovement>().highArc = HighArcTrajectory;
             ball.GetComponent<BulletMovement>().targetPosition = GameObject.FindGameObjectWithTag("Player").transform.position + Vector3.up + Random.insideUnitSphere * accuracyRadius;
@@ -41,8 +39,6 @@ public class TurretScript : MonoBehaviour {
 			reloadCounter = 0;
         }
 	}
-
-
 
     void OnTriggerEnter(Collider other){
         if (other.gameObject.tag == "Player"){
