@@ -115,16 +115,26 @@ public class BulletMovement : MonoBehaviour {
 	//For now, kill bullet just resets it's location
 	void killBullet(){
 		
-		rigidbody.useGravity = false;
-		rigidbody.isKinematic = true;
-		rigidbody.velocity = Vector3.zero;
-		gameObject.tag = "";
+		//rigidbody.useGravity = false;
+		//rigidbody.isKinematic = true;
+		//rigidbody.velocity = Vector3.zero;
+        Destroy(rigidbody);
 
 		// Does something with making the ball stay there
 		transform.collider.isTrigger = false;
 		this.enabled = false;
         //Destroy(gameObject);
 	}
+
+    // Actually kills, redacted code from long agooooo ^^^
+    public void ClearBullet()
+    {
+        //rigidbody.useGravity = false;
+        //rigidbody.isKinematic = true;
+       // rigidbody.velocity = Vector3.zero;
+
+        Destroy(gameObject);
+    }
 
 	void OnTriggerEnter(Collider other){
         if(other.gameObject.layer != 2){
